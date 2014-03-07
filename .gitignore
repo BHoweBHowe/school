@@ -1,0 +1,4 @@
+# file extentions to be ignored when adding
+*.[oa]
+*.tmp
+*.log
