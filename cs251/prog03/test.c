@@ -1,5 +1,25 @@
+/*
+ AUTH:  Brian Howe
+
+ DESC: tests the functions of the binary search tree(bst) datatype.
+
+ TODO: bst_get_nearest, bst_num_geq, bst_num_leq.
+*/
+
 #include <assert.h>
+#include <stdio.h>
 #include "bst.h"
+
+
+// prints array of numbers
+void print_arr(int *a, int n) {
+    int i;
+    printf("bst_to_array = {");
+    for(i = 0; i < n; i++) {
+        printf("%d,", a[i]);
+    }
+    printf("\b}\n");
+}
 
 
 int main(){
@@ -16,29 +36,39 @@ int main(){
 
     assert(bst_size(t) == 7);
 
-    /* PART 2 */
-    
+    // test bst_to_array
+    int *b = bst_to_array(t);
+    print_arr(b, 7);
+
+    // test min, max, size
+    printf("Tree info {size = %d, min = %d, max = %d}\n",
+                                                bst_size(t),
+                                                bst_min(t),
+                                                bst_max(t));
+    printf("2nd smallest element is: %d\n", bst_get_ith(t,2));
+
     bst_inorder(t);
-
-    bst_preorder(t);
-
     bst_postorder(t);
 
     bst_free(t);
-    
-    /* PART 3 (extra) */
-    
-    int sorted_a[] = {2, 3, 6, 7, 8, 9, 11};
-    
+
+    /* Second bst */
+
+    int sorted_a[] = {2,6,10,15,17,22,30};
+
     t = bst_from_sorted_arr(sorted_a, 7);
-    
-    /*
-    bst_inorder(t);
 
+    // test bst_get_ith
+    printf("3rd smallest element is: %d\n", bst_get_ith(t,3));
+
+    bst_inorder(t);
     bst_preorder(t);
 
-    bst_postorder(t);
+    // test remove
+    bst_remove(t, 3);
+
+    bst_inorder(t);
 
     bst_free(t);
-    */
+
 }
