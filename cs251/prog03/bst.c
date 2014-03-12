@@ -114,12 +114,12 @@ int bst_contains(BST_PTR t, int x){
 }
 
 
-static int min_h(NODE *r){
+int min_h(NODE *r){
   return r->min;
 }
 
 
-static int max_h(NODE *r){
+int max_h(NODE *r){
   return r->max;
 }
 
@@ -172,7 +172,7 @@ int bst_remove(BST_PTR t, int x){
 }
 
 // returns nuber of nodes in tree of root r.
-static int size(NODE *r){
+int size(NODE *r){
     return r->size;
 }
 
