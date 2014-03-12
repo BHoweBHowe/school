@@ -3,7 +3,7 @@
 
  DESC: a set of functions for binary search trees(bst)
 
- TODO: bst_get_nearest, bst_num_geq, bst_num_leq.
+ TODO:
 */
 
 #include "bst.h"
@@ -114,13 +114,11 @@ int bst_contains(BST_PTR t, int x){
 }
 
 
-// finds the height to the left of the root
 static int min_h(NODE *r){
   return r->min;
 }
 
 
-// finds the height to the right of the root
 static int max_h(NODE *r){
   return r->max;
 }
@@ -297,31 +295,31 @@ static NODE * from_arr(int *a, int n){
 
     if(n==1) {
         r->val = a[0];
-        r->size = 1;
         r->right = NULL;
         r->left = NULL;
         r->max = r->min = a[0];
+        r->size = n;
         return r;
     }
 
     if(n==2) {
         r->val = a[1];
-        r->size = n;
         r->right = NULL;
         r->left = from_arr(a, 1);
         r->max = a[1];
         r->min = a[0];
+        r->size = n;
         return r;
     }
 
     int mid = n/2;
 
     r->val = a[mid];
-    r->size = n;
     r->max = a[n-1];
     r->min = a[0];
     r->right = from_arr(&a[mid+1], n-(mid+1));
     r->left = from_arr(a, mid);
+    r->size = n;
     return r;
 }
 
@@ -337,30 +335,25 @@ BST_PTR bst_from_sorted_arr(int *a, int n){
 
 /* allocates an integer array, populates it with the elements
  of t (in-order) and returns the array as an int pointer */
-int *to_array_r(NODE *n, int *arr) {
-    int size = n->size; // size of subtree
+void to_array_r(NODE *n, int *arr) {
     NODE *r = n->right;
     NODE *l = n->left;
 
     if(l == NULL) { // lowest value in tree
         arr[0] = n->val;
-        if(r == NULL) {
-            return;
+        if(r != NULL) {
+            to_array_r(r, &arr[1]);
         }
-        to_array_r(r, &arr[1]);
         return;
     }
 
     arr[l->size] = n->val; // num elem in left leaf is mun elem before n in array.
     to_array_r(l, arr);
 
-    if(r == NULL) {
-        return;
+    if(r != NULL) {
+        to_array_r(r, &arr[n->size - r->size]);
     }
-    to_array_r(r, &arr[size - r->size]);
-    return arr;
 }
-
 int * bst_to_array(BST_PTR t) {
     int *arr = malloc(sizeof(int) * size(t->root));
     to_array_r(t->root, arr);
@@ -374,7 +367,7 @@ int * bst_to_array(BST_PTR t) {
  whatever you like, but it has no meaning. Runtime: O(h) where h is the tree height*/
 int get_ith_r(NODE *n, int i) {
     int size = n->size;
-    if(i <= 0 || size < i) {
+    if(i < 1 || size < i) {
         fprintf(stderr, "Element i out of bounds\n");
         return 1;
     }
@@ -391,7 +384,6 @@ int get_ith_r(NODE *n, int i) {
     }
     return get_ith_r(l, i); // continue left
 }
-
 int bst_get_ith(BST_PTR t, int i) {
     return get_ith_r(t->root, i);
 }
@@ -401,20 +393,73 @@ int bst_get_ith(BST_PTR t, int i) {
  in the three where |x-y| is minimum. If the tree is empty, a message
  is sent to stderr and the return value is of your choosing.
  Runtime: O(h) where h is the tree height.*/
+int get_nearest_r(NODE *n, int x) {
+    if(n == NULL) { // tree empty
+        fprintf(stderr, "Tree empty\n");
+        return -1;
+    }
+    if(x == n->val) {
+        return x;
+    }
+    if(x >= n->max) { // x is larger than all vals in tree
+        return n->max;
+    }
+    if(x <= n->min) { // x is smaller than all vals in tree
+        return n->min;
+    }
+
+    // if it gets here the tree has atleast 1 child
+    int tmp = 0;
+    if(x > n->val && n->right != NULL) { // x is between n->val +1 and right->max
+        tmp = get_nearest_r(n->right, x);
+    }
+    else { // x is between n->val -1 and left->min
+        tmp = get_nearest_r(n->left, x);
+    }
+
+    if(abs(n->val - x) < abs(tmp - x)) { // x is closer to n->val
+        return n->val;
+    }
+    return tmp; // x is closer to tmp
+}
 int bst_get_nearest(BST_PTR t, int x){
-    return 0;
+    return get_nearest_r(t->root, x);
 }
 
 
 /* returns the number of elements in t which are greater than or equal to x.
  Runtime: O(h) where h is the tree height*/
-int bst_num_geq(BST_PTR *t, int x) {
-    return 0;
+int num_geq_r(NODE *n, int x) {
+    if(n == NULL) {
+        return 0;
+    }
+    if(x <= n->val) {
+        if(n->right == NULL) {
+            return 1 + num_geq_r(n->left, x);
+        }
+        return (n->right->size + 1) + num_geq_r(n->left, x); // all elem to the right are
+    }                                                           // greater or equal to x
+    return num_geq_r(n->right, x);
+}
+int bst_num_geq(BST_PTR t, int x) {
+    return num_geq_r(t->root, x);
 }
 
 
 /* returns the number of elements in t which are less than or equal to x.
  Runtime: O(h) where h is the tree height*/
-int bst_num_leq(BST_PTR *t, int x) {
-    return 0;
+int num_leq_r(NODE *n, int x) {
+    if(n == NULL) {
+        return 0;
+    }
+    if(x >= n->val) {
+        if(n->left == NULL) {
+            return 1 + num_leq_r(n->right, x);
+        }
+        return (n->left->size + 1) + num_leq_r(n->right, x); // all elem to the left are
+    }                                                           // less or equal to x
+    return num_leq_r(n->left, x);
+}
+int bst_num_leq(BST_PTR t, int x) {
+    return num_leq_r(t->root, x);
 }
