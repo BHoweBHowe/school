@@ -83,15 +83,7 @@ static NODE * insert(NODE *r, int x){
 }
 
 
-// how about an interactive version?
-static NODE *insert_i(NODE *r, int x){
-
-  return NULL;
-
-}
-
-
-void bst_insert(BST_PTR t, int x){
+void bst_insert(BST_PTR t, int x) {
     t->root = insert(t->root, x);
 }
 
@@ -155,9 +147,21 @@ int sanity;
   }
   if(x < r->val){
     r->left = remove_r(r->left, x, success);
+    if(r->left != NULL) { // updates min tree vals
+        r->min = r->left->min;
+    }
+    else {
+        r->min = r->val;
+    }
   }
   else {
     r->right = remove_r(r->right, x, success);
+    if(r->right != NULL) { // updates max tree vals
+        r->max = r->right->max;
+    }
+    else {
+        r->max = r->val;
+    }
   }
   r->size--;
   return r;
@@ -367,20 +371,24 @@ int * bst_to_array(BST_PTR t) {
  whatever you like, but it has no meaning. Runtime: O(h) where h is the tree height*/
 int get_ith_r(NODE *n, int i) {
     int size = n->size;
-    if(i < 1 || size < i) {
+    if(i < 1 || n == NULL) {
         fprintf(stderr, "Element i out of bounds\n");
         return 1;
     }
     NODE *l = n->left;
+    NODE *r = n->right;
 
     if(l == NULL) { // lowest val in tree
-        if(size == i) {
+        if(i == 1) {
             return n->val;
         }
-        return get_ith_r(n->right, i-1);
+        return get_ith_r(r, i-1);
     }
-    if(l->size < i) {
-        return get_ith_r(n->right, (i-1) - (l->size));
+    if(l->size < i) { // all left are less than i
+        if((size - l->size) == i) { // i is the root node
+            return n->val;
+        }
+        return get_ith_r(r, (i-1) - l->size);
     }
     return get_ith_r(l, i); // continue left
 }

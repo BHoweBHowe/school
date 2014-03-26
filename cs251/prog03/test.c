@@ -28,18 +28,18 @@ int main(){
 
     /* PART 1 */
 
-    int a[] = {8, 2, 6, 9, 11, 3, 7};
+    int a[] = {-44,-29,1,100,33,8,2,6,9,11,3,7};
 
     BST_PTR t = bst_create();
 
-    for(i=0; i<7; i++)
+    for(i=0; i<12; i++)
         bst_insert(t, a[i]);
 
-    assert(bst_size(t) == 7);
+    assert(bst_size(t) == 12);
 
     // test bst_to_array
     int *b = bst_to_array(t);
-    print_arr(b, 7);
+    print_arr(b, 12);
     free(b);
 
     // test min, max, size
@@ -47,7 +47,7 @@ int main(){
                                                 bst_size(t),
                                                 bst_min(t),
                                                 bst_max(t));
-    printf("2nd smallest element is: %d\n", bst_get_ith(t,2));
+    printf("2nd smallest element is: %d\n", bst_get_ith(t,3));
 
     bst_inorder(t);
     // test bst_num_leq and bst_num_geq
@@ -78,7 +78,9 @@ int main(){
     // test bst_get_nearest
     printf("num closest to 20: %d\n", bst_get_nearest(t, 20));
     // test remove
-    bst_remove(t, 22);
+    if(bst_remove(t, 30)) {
+        printf("30 has been removed.\n");
+    }
     // test bst_get_nearest
     printf("num closest to 20: %d\n", bst_get_nearest(t, 20));
 
