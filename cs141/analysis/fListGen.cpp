@@ -1,38 +1,56 @@
 /*
- AUTH: Brian Howe
+AUTH: Brian Howe
 
- DESC: generates a file with the names of all files in the folder speeches.
-       The folder must be in same directory as this program.
+DESC: generates a file with the names of all files in the folder speeches.
+The folder must be in same directory as this program.
 
- *** Run with "./fListGen > output.txt" ***
+*** Run with "./fListGen > output.txt" ***
 */
 
 #include <stdio.h>
 #include <dirent.h>
 #include <string>
+#include <algorithm>
+
+using namespace std;
+
+// prints the list
+void print_files(string files[], int n) {
+    int i;
+    for(i = 0; i < n; i++) {
+        printf("%s\n", files[i].c_str());
+    }
+}
+
 
 int main() {
 
     DIR *dir;
     struct dirent *ent;
+    string files[60]; // there are less than 60 speeches
+    int i =0;
 
     if ((dir = opendir ("speeches/")) != NULL) {
-        /* print all the files and directories within directory */
+
         while ((ent = readdir (dir)) != NULL) {
-            std::string file = ent->d_name;
+            files[i] = ent->d_name;
 
             // only print if file extension is .txt
-            if(file.substr(file.find_last_of(".") + 1) == "txt") {
-                printf ("%s\n", ent->d_name);
+            if(files[i].substr(files[i].find_last_of(".") + 1) == "txt") {
+                i++;
             }
         }
         closedir (dir);
     }
     else {
         /* could not open directory */
-        perror ("");
+        perror ("Could not open directory.\n");
         return -1;
     }
+
+    sort(files, files+i);
+
+    print_files(files, i);
 
     return 0;
 }
