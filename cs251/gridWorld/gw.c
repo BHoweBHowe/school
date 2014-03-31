@@ -85,7 +85,7 @@ GW gw_build(int nrows, int ncols, int pop, int rnd) {
             d->first = NULL;
 
             if(rnd == 1) { //population is dispersed randomly
-
+		// incomplete
             }
             else { //all people are placed in district 0,0
                 if(i == 0 && j == 0) {

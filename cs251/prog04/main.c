@@ -4,7 +4,7 @@
 #include "pq.h"
 
 int main() {
-    PQ_PTR pq = pq_create(10, 1);
+    PQ_PTR pq = pq_create(10, 0);
 
     pq_insert(pq, 0, 5);
     pq_insert(pq, 1, 10);
@@ -21,6 +21,26 @@ int main() {
 
     double p;
     int id;
+
+    pq_delete_top(pq, &id, &p);
+    printf("first in queue: %d, %f\n", id, p);
+
+    pq_delete_top(pq, &id, &p);
+    printf("first in queue: %d, %f\n", id, p);
+
+    pq_delete_top(pq, &id, &p);
+    printf("first in queue: %d, %f\n", id, p);
+
+    pq_delete_top(pq, &id, &p);
+    printf("first in queue: %d, %f\n", id, p);
+
+    pq_delete_top(pq, &id, &p);
+    printf("first in queue: %d, %f\n", id, p);
+
+    pq_delete_top(pq, &id, &p);
+    printf("first in queue: %d, %f\n", id, p);
+
+    pq_remove_by_id(pq, 2);
 
     pq_delete_top(pq, &id, &p);
     printf("first in queue: %d, %f\n", id, p);

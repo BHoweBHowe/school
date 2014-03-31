@@ -1,7 +1,4 @@
-/*
-* GridWorld
-* By: Brian Howe
-*/
+// i was experiementing with the getopt library
 
 #include <stdio.h>
 #include <stdlib.h>
