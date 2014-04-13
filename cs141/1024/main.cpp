@@ -36,32 +36,20 @@ int valid_dir(char dir) {
     return 0;
 }
 
-void move_nums(int start, int end, int k) {
+void move_up() {
     int i;
-    int *cur;
-    int *next;
-
-    for(i = start; i < end; i++) {
-        cur = &board[i];
-
-        if(*cur != 46) {
-            if((i+k) !< 0 && (i+k) % b_size != 0 && (i+k) !>= b_size*b_size) {
-                next = board[i+k];
-                if(*next == 46) {
-                    *next = *cur;
-                    *cur = 46;
-                }
-                else if(
-            }
+    int next;
+    for(i = 0; i < b_size*b_size; i++) {
+        next = i - 10;
+        if(next >= 0) {
+            if(
         }
     }
 }
 
 void make_move() {
     char dir;
-    int k = 1;
-    int start = 0;
-    int end = b_size*b_size;
+    int i, j, vert;
 
     num_turns++;
 
@@ -75,18 +63,22 @@ void make_move() {
         }
     } while(!valid_dir(dir));
 
-    if(dir == 'w' || dir == 'a') {
-        k = -k;
+    if(dir == 'w') {
+        move_up();
     }
-    if(dir == 'w' || dir == 's') {
-        k = k * b_size;
+    else if(dir == 'a') {
+        move_left();
     }
-    if(dir == 's' || dir == 'd') {
-        start = b_size*b_size;
-        end = 0;
+    else if(dir == 's') {
+        move_down();
+    }
+    else if(dir == 'd') {
+        move_right();
     }
 
-    move_nums(start, end, k);
+    for(i = 0; i < b_size; i++) {
+        move_nums(0, jump[j]);
+    }
 }
 
 void plc_rnd() {
@@ -94,7 +86,7 @@ void plc_rnd() {
 
     do{
         i = rand() % (b_size * b_size);
-    } while(board[i] != 46);
+    } while(board[i] != -1);
 
     board[i] = 2;
     num_on_board++;
@@ -105,7 +97,7 @@ void init_board() {
 
     int i;
     for(i = 0; i < b_size * b_size; i++) {
-        board[i] = 46;
+        board[i] = -1;
     }
 
     max = 2;
@@ -119,7 +111,7 @@ void init_board() {
 void print_board() {
     int i;
     for(i = 1; i <= b_size * b_size; i++) {
-        if(board[i-1] == 46) {
+        if(board[i-1] == -1) {
             printf(" %3c", '.');
         }
         else {
