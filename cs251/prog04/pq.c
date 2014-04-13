@@ -3,7 +3,7 @@
 *
 * DESC: a set of function that control and maintain a priority queue binary heap
 *
-* TODO: fix prioritze
+* TODO: 
 */
 
 #include <stdio.h>

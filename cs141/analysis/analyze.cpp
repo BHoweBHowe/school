@@ -1,10 +1,11 @@
 /*
- AUTH: Brian Howe
-
- DESC: anaylize the inagural speeches of the presidents
-
- TODO: out put is fucked. fix get_data and make it so print_data
-       can print the name and date.
+* Speech analyzer
+*
+* Class: CS 141, Spring 2014, Thurs 4pm lab.
+* System: Linux Mint x64, g++
+* Author: Brian Howe
+*
+* TODO: output is off for some speeches and singular nouns.
 */
 
 #include <stdio.h>
@@ -20,8 +21,14 @@ struct speech_struct {
     int words;
     int sents;
     int parags;
+    int sing;
+    int plur;
 } typedef SPEECH;
 
+char *sing[7] = {(char*)"i", (char*)"i've", (char*)"i'll", (char*)"me",
+                    (char*)"my", (char*)"mine", (char*)"myself"};
+char *plur[7] = {(char*)"we", (char*)"we've", (char*)"we'll", (char*)"us",
+                    (char*)"our", (char*)"ours", (char*)"ourselves"};
 
 void print_heading(int num, char *s) {
     printf("Author: Brian Howe\n");
@@ -38,7 +45,21 @@ char * resize(char *in, int n) {
 }
 
 
-// analyzes all the content of the file
+// finds all singular and plural pronouns
+void pronouns(SPEECH *sData, char *word) {
+    int i;
+    for(i = 0; i < 7; i++) {
+        if(strcmp(word, sing[i]) == 0) {
+            sData->sing++;
+        }
+        else if(strcmp(word, plur[i]) == 0) {
+            sData->plur++;
+        }
+    }
+}
+
+
+// analyzes all the content of the file (letters, words, paragaphs, etc.)
 void get_data(SPEECH *sData, FILE *sFile) {
     char *all;
 
@@ -47,6 +68,8 @@ void get_data(SPEECH *sData, FILE *sFile) {
     sData->words = 0;
     sData->sents = 0;
     sData->parags = 1; // the last parag doesnt end in '\r'
+    sData->sing = 0;
+    sData->plur = 0;
 
     int n = 20000; // 20000 is an average amount of characters in the speeches
     all = (char*)malloc(sizeof(char) * n);
@@ -69,21 +92,18 @@ void get_data(SPEECH *sData, FILE *sFile) {
 
         for(i = 0; i < lenWord; i++) {
             if(isalpha(word[i])) {
-                if(i > 0 && word[i-1] == '\r') { // if there is no space before parag
-                    sData->words++;
-                }
                 sData->letters++;
+                word[i] = tolower(word[i]);
             }
-            else if(word[i] == '.') {
+            else if(word[i] == '.' || word[i] == '?') {
                 sData->sents++;
             }
             else if(word[i] == '\r') {
-                // avoid extra '\r' and other punctuation
-                if(i > 0 && (word[i-2] == '.' || word[i-2] == '"')) {
-                    sData->parags++;
-                }
+                sData->parags++;
+                i = lenWord; // avoids extra '\r'
             }
         }
+        pronouns(sData, word);
 
         word = strtok(NULL, " "); // read next word
     }
@@ -99,7 +119,7 @@ void analyze(SPEECH *sData, char *path) {
         printf("Could not open %s.\n", path);
     }
 
-    path = &path[9]; // removes speeches/ from string
+    path = &path[10]; // removes datafiles/ from string
 
     char *tmp = path;
     while(tmp != NULL) { // changes all '_' to ' '
@@ -119,6 +139,7 @@ void analyze(SPEECH *sData, char *path) {
 }
 
 
+// prints a char a specified amount
 void print_char(char c, int n) {
     int i;
     for(i = 0; i <= n; i++) {
@@ -130,27 +151,39 @@ void print_char(char c, int n) {
 // prints all speech data
 void print_data(SPEECH s[], int n) {
     int i;
-    printf("%23s | %15s | %6s | %6s | %6s | %6s |\n", "Speaker",
-                                                    "Date",
-                                                    "letrs",
-                                                    "words",
-                                                    "sents",
-                                                    "parags");
+    printf("%26s | %15s | %6s | %6s | %6s | %6s | %6s | %6s | %6s| %6s| %7s|\n",
+                                                            "Speaker",
+                                                            "Date",
+                                                            "Letrs",
+                                                            "Words",
+                                                            "Sents",
+                                                            "Parags",
+                                                            "Sing.",
+                                                            "Plur.",
+                                                            "Let/Wd",
+                                                            "Wd/Snt",
+                                                            "Sng/Plr");
     for(i = 0; i < n; i++) {
         if(i > 0 && strcmp(s[i-1].speaker, s[i].speaker) == 0) {
+            printf("%2d.", i+1);
             print_char(' ', 23);
             printf("| ");
         }
         else{
-            print_char('-', 80);
-            printf("\n%23s | ", s[i].speaker);
+            print_char('-', 125);
+            printf("\n%2d.%23s | ", i+1, s[i].speaker);
         }
 
         printf("%15s | ", s[i].date);
         printf("%6d | ", s[i].letters);
         printf("%6d | ", s[i].words);
         printf("%6d | ", s[i].sents);
-        printf("%6d |", s[i].parags);
+        printf("%6d | ", s[i].parags);
+        printf("%6d | ", s[i].sing);
+        printf("%6d |", s[i].plur);
+        printf("%6d |", s[i].letters/s[i].words);
+        printf("%6d |", s[i].words/s[i].sents);
+        printf("%7.2f |", (double)s[i].sing/s[i].plur);
         printf("\n");
     }
 }
@@ -162,7 +195,7 @@ int main() {
 
     print_heading(4, (char*)"Inaugural Analysis");
 
-    speechList = fopen("speeches.txt", "r");
+    speechList = fopen("datafiles.txt", "r");
     if(speechList == NULL) {
         printf("Could not open file speeches.txt.\n");
         return -1;
@@ -172,8 +205,8 @@ int main() {
     char *tmp;
     char *buff = (char*) malloc(sizeof(char) * 128);
     while(!feof(speechList) && i < 57) {
-        strcpy(buff, (char*)"speeches/");
-        fgets(&buff[9], 119, speechList);
+        strcpy(buff, (char*)"datafiles/");
+        fgets(&buff[10], 119, speechList);
         tmp = strchr(buff, '\n');
         if(tmp != NULL) {
             *tmp = '\0';
