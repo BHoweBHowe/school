@@ -1,0 +1,4 @@
+Brian Howe
+project: fakemake
+
+my program fails to check for non acyclical graphs resulting in a crash if make is called on one.

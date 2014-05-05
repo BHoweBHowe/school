@@ -1,5 +1,5 @@
 a
-b
-x : a
-y : b
+b : a
+c : d
+d : b c
 

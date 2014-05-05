@@ -1,3 +1,10 @@
+/*
+    fakemake
+
+    AUTH: Brian Howe
+    DATE: 5/1/2014
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,11 +47,13 @@ void add_node(HMAP_PTR graph, char *key) {
 */
 HMAP_PTR build_graph(FILE *f, char keys[][BUFF], int *n) {
     HMAP_PTR graph      = hmap_create(0, 0);
+    HMAP_PTR undeclared = hmap_create(0, 0);
     char     *word      = malloc(sizeof(char) * BUFF);
     char     *prev_word = malloc(sizeof(char) * BUFF);
     char     *line      = malloc(sizeof(char) * BUFF);
 
-    int i = 0;
+    int i = 0; // num unique files added to graph
+    int k = 0; // num unique dependencies not yet in graph
 
     // parses file
     while(fgets(line, BUFF, f)) {
@@ -57,9 +66,14 @@ HMAP_PTR build_graph(FILE *f, char keys[][BUFF], int *n) {
                 strcpy(keys[i], word);
                 i++;
                 (*n)++;
+
+                if(hmap_contains(undeclared, word)) {
+                    k--;
+                    hmap_remove(undeclared, word);
+                }
             }
             // has dependencies
-            if(strcmp(word, ":") == 0) {
+            else if(strcmp(word, ":") == 0) {
                 FNODE *prev = hmap_get(graph, prev_word);
                 word = strtok(NULL, " ");
 
@@ -75,12 +89,10 @@ HMAP_PTR build_graph(FILE *f, char keys[][BUFF], int *n) {
                     d->next = prev->head;
                     prev->head = d;
 
-                    // if the dependency hasnt been added to the graph
                     if(!hmap_contains(graph, word)) {
-                        add_node(graph, word);
-                        strcpy(keys[i], word);
-                        i++;
-                        (*n)++;
+                        int *temp;
+                        hmap_set(undeclared, word, temp);
+                        k++;
                     }
 
                     if(prev_word[0] != '\n') {
@@ -94,9 +106,15 @@ HMAP_PTR build_graph(FILE *f, char keys[][BUFF], int *n) {
         }
     }
 
+    if(k > 0) {
+        fprintf(stderr, "A dependency was not found. exiting...\n");
+        *n = -1;
+    }
+
     free(word);
     free(prev_word);
     free(line);
+    hmap_free(undeclared, 0);
 
     return graph;
 }
@@ -233,6 +251,10 @@ int main(int argc, char *argv[]) {
     HMAP_PTR graph = build_graph(m_file, keys, &num_keys);
 
     fclose(m_file);
+
+    if(num_keys == -1) {
+        return -1; // file had undeclared dependency. exit program.
+    }
 
     do {
         printf("> ");
